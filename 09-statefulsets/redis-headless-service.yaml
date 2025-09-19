@@ -1,0 +1,14 @@
+# This is a headless service, required by the StatefulSet.
+# It provides a stable network identity for each pod.
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-headless
+spec:
+  clusterIP: None # This makes it headless.
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379

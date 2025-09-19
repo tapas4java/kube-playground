@@ -1,0 +1,25 @@
+# This manifest requires a TLS secret to exist.
+# You can create one with:
+# kubectl create secret tls tls-secret --key /path/to/tls.key --cert /path/to/tls.crt
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tls-ingress-example
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - https-example.localtest.me
+      secretName: tls-secret
+  rules:
+    - host: https-example.localtest.me
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: nginx-service-clusterip
+                port:
+                  number: 80

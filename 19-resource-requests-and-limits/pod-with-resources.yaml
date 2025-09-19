@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-resources
+spec:
+  containers:
+    - name: nginx
+      image: nginx:1.21.0
+      resources:
+        requests:
+          memory: "64Mi"
+          cpu: "250m" # 250 millicores (1/4 of a core)
+        limits:
+          memory: "128Mi"
+          cpu: "500m" # 500 millicores (1/2 of a core)

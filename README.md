@@ -40,10 +40,13 @@ This will drop you into a shell and automatically trigger the `start.sh` script.
 1.  Create a multi-node Kind cluster running Kubernetes v1.34.0.
 2.  Install the NGINX Ingress controller.
 3.  Install the Headlamp dashboard.
+4.  Install a full observability stack (Prometheus, Grafana, Loki, Tempo).
 
 Once the script is finished, your environment is ready! It will print the login token for the Headlamp dashboard.
 
 You can access the Headlamp dashboard at `http://headlamp.localtest.me`. Copy the token from your terminal and paste it into the login screen.
+
+You can access the Grafana dashboard at `http://grafana.localtest.me` (login with `admin` / `prom-operator`).
 
 When you are ready to stop, you can type `exit` in your terminal to leave the Devbox shell. This will automatically trigger the cleanup process.
 
@@ -51,121 +54,67 @@ When you are ready to stop, you can type `exit` in your terminal to leave the De
 
 The repository is organized by Kubernetes concepts, with each directory containing the relevant manifests and instructions.
 
-- `/01-cluster-setup`: Configuration for the Kind cluster and Headlamp dashboard.
-- `/02-namespaces`: `dev` and `prod` namespace examples.
-- `/03-pods`: Basic Pod examples.
-- `/04-replicasets`: ReplicaSet examples.
-- `/05-deployments`: Deployment examples.
-- `/06-services`: Service examples (ClusterIP, NodePort).
-- `/07-configmaps-secrets`: ConfigMap and Secret examples.
-- `/08-volumes`: PersistentVolume and PersistentVolumeClaim examples.
-- `/09-statefulsets`: StatefulSet examples.
-- `/10-daemonsets`: DaemonSet examples.
-- `/11-jobs-cronjobs`: Job and CronJob examples.
-- `/12-probes`: Liveness, Readiness, and Startup Probe examples.
-- `/13-autoscaling`: Horizontal Pod Autoscaler instructions.
-- `/14-scheduling`: Node affinity and taints/tolerations examples.
-- `/15-network-policies`: Network Policy examples.
-- `/16-rbac`: RBAC, Service Account, and ResourceQuota examples.
-- `/17-ingress`: Ingress and NGINX Ingress Controller examples.
-- `/18-custom-resources`: Custom Resource Definition (CRD) examples.
-- `/19-shopping-cart-app`: A complete shopping cart application with frontend, backend, and database.
-- `/20-productionize-shopping-cart`: A section for productionizing the app with monitoring.
+-   `/00-cluster-setup`: Contains all the configuration for the automated environment setup. To see how the environment is created, you can inspect the `start.sh` script and the manifests in this directory.
+
+-   `/02-namespaces`: Namespaces are used to create logical partitions of the cluster. The `namespaces.yaml` file shows how to create `dev` and `prod` namespaces.
+
+-   `/03-pods`: Pods are the smallest deployable units in Kubernetes. We have a basic `nginx-pod.yaml` and a `pod-with-multicontainer.yaml` to show a more complex pod with shared volumes.
+
+-   `/04-replicasets`: A ReplicaSet ensures that a specified number of pod replicas are running at any given time. While not often used directly, they are the basis for Deployments. See `nginx-rs.yaml`.
+
+-   `/05-deployments`: Deployments are the standard way to manage stateless applications. They handle rolling updates and rollbacks. The `nginx-deploy.yaml` provides a basic example, while `deployment-strategies.yaml` demonstrates the difference between `RollingUpdate` and `Recreate` strategies.
+
+-   `/06-services`: Services provide stable network endpoints for pods. We cover four types: `nginx-service-clusterip.yaml` (internal), `nginx-service-nodeport.yaml` (exposes on node), `nginx-service-loadbalancer.yaml` (uses cloud provider LB), and `externalname-service.yaml` (maps to an external DNS name).
+
+-   `/07-configmaps-secrets`: These resources externalize configuration. We show how to create a `configmap.yaml` and `secret.yaml`, and then how to consume them as environment variables (`pod-with-env.yaml`) or as mounted files (`pod-with-volume-mounts.yaml`).
+
+-   `/08-volumes`: Volumes provide data persistence beyond a container's lifecycle. We show a temporary `pod-with-emptydir.yaml` and a persistent example using `pvc.yaml` (the claim) and `pod-with-pvc.yaml` (the consumer).
+
+-   `/09-statefulsets`: For stateful applications, a `statefulset.yaml` provides stable network identifiers and persistent storage. Our example uses Redis and its required `redis-headless-service.yaml`.
+
+-   `/10-daemonsets`: DaemonSets ensure that all (or some) nodes run a copy of a pod. This is useful for log collectors or monitoring agents. See `daemonset.yaml`.
+
+-   `/11-jobs-cronjobs`: For batch processing, a `job.yaml` runs a task to completion. A `cronjob.yaml` runs a job on a schedule. We also include a `parallel-job.yaml` to show how multiple pods can work on a task.
+
+-   `/12-probes`: Probes are used for health checking. The `deployment-with-probes.yaml` example now includes `livenessProbe`, `readinessProbe`, and `startupProbe` to ensure container health.
+
+-   `/13-autoscaling`: The Horizontal Pod Autoscaler (HPA) automatically scales the number of pods. See the `README.md` in this folder for a full walkthrough using the `hpa.yaml` and `php-apache-deployment.yaml`.
+
+-   `/14-scheduling`: Control where your pods run. `node-affinity-pod.yaml` schedules pods based on node labels, `taints-and-tolerations/` forces pods to have tolerations to run on a tainted node, and `pod-affinity-pod.yaml` schedules pods based on the location of other pods.
+
+-   `/15-network-policies`: Network Policies control traffic flow between pods. We provide an example of allowing traffic between a `frontend.yaml` and a `backend.yaml` with `backend-policy.yaml`, and also a `default-deny-policy.yaml` for a more secure posture.
+
+-   `/16-rbac`: Role-Based Access Control manages permissions. `rbac.yaml` shows a `Role` and `RoleBinding` (namespaced), while `clusterrole.yaml` shows a `ClusterRole` and `ClusterRoleBinding` (cluster-wide). Other examples include `pod-with-sa.yaml` and `resource-quota.yaml`.
+
+-   `/17-ingress`: Ingress manages external access to services, typically HTTP. `ingress.yaml` shows basic host-based routing, and `tls-ingress.yaml` demonstrates how to secure it with a TLS certificate.
+
+-   `/18-custom-resources`: Extend the Kubernetes API by creating your own resources with a `crd.yaml` (Custom Resource Definition) and then creating instances of it like `foo-resource.yaml`.
+
+-   `/19-resource-requests-and-limits`: Managing resource requests and limits.
+
+-   `/20-shopping-cart-app`: A complete shopping cart application.
 
 ### 🛍️ Example Application: Shopping Cart
 
-The `/19-shopping-cart-app` directory contains the Google microservices demo, a fully functional, multi-tier application that demonstrates how various Kubernetes resources work together in a realistic scenario.
+The `/20-shopping-cart-app` directory contains the Google microservices demo, a fully functional, multi-tier application that demonstrates how various Kubernetes resources work together in a realistic scenario.
 
 > **Note:** This application is sourced from the official [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) repository.
-
-**Application Architecture:**
-
-This application is composed of many microservices written in different languages that talk to each other over gRPC. It includes services for a frontend, product catalog, cart, checkout, and more.
 
 **How to Deploy:**
 
 1.  Make sure you are in the root of the repository.
-2.  Apply all the manifests in the `19-shopping-cart-app` directory. This will deploy all the microservices and the Ingress to expose the application.
+2.  Apply all the manifests in the `20-shopping-cart-app` directory. This will deploy all the microservices and the Ingress to expose the application.
     ```bash
-    kubectl apply -f 19-shopping-cart-app/
+    kubectl apply -f 20-shopping-cart-app/
     ```
 3.  Verify that all the pods are running:
     ```bash
     kubectl get pods
     ```
-    You should see pods for all the different microservices. This may take a few minutes to start up.
 
 **How to Access:**
 
 You can now access the shopping cart application at `http://shop.localtest.me`.
-
-### 🏭 Productionizing the App with Full Observability
-
-The final step is to install a complete observability stack. This will give you visibility into the three pillars of observability: **metrics**, **logs**, and **traces**. We will use a combination of popular open-source tools from the Grafana ecosystem.
-
-The manifests for this section are in the `/20-productionize-shopping-cart` directory.
-
-**1. Install Prometheus for Metrics**
-
-We'll use the `kube-prometheus-stack` Helm chart, which includes Prometheus for collecting metrics and Grafana for dashboards.
-
-First, add the `prometheus-community` Helm repository:
-```bash
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-```
-
-Now, install the stack into a new `monitoring` namespace:
-```bash
-helm install prometheus prometheus-community/kube-prometheus-stack --version 77.9.1 --namespace monitoring --create-namespace \
-  --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
-```
-
-**2. Configure ServiceMonitors for Key Services**
-
-`ServiceMonitor`s tell Prometheus which services to monitor. Apply the manifest from the `/20-productionize-shopping-cart` directory to monitor the `frontend`, `checkout`, and `recommendation` services.
-```bash
-kubectl apply -f 20-productionize-shopping-cart/servicemonitors.yaml
-```
-
-**3. Install Loki for Logging**
-
-Next, we'll install Grafana Loki, a powerful log aggregation system. We will use the `loki-stack` chart, which includes Loki for the backend and Promtail as the agent to collect logs from all pods.
-
-```bash
-helm repo add grafana https://grafana.github.io/helm-charts
-helm repo update
-helm install loki grafana/loki-stack --version 2.10.2 --namespace monitoring
-```
-
-**4. Install Tempo for Tracing**
-
-Finally, we'll install Grafana Tempo for distributed tracing. But first, we need to enable tracing in the demo application.
-
-The application's deployments have tracing disabled by default. Open the `19-shopping-cart-app/google-microservices-demo.yaml` file and change all instances of `DISABLE_TRACING` from `"1"` to `"0"`.
-
-Now, install Tempo:
-```bash
-helm install tempo grafana/tempo --version 1.8.0 --namespace monitoring
-```
-
-**5. Access Grafana for All Observability Data**
-
-To access the Grafana dashboard, apply the Ingress manifest:
-```bash
-kubectl apply -f 20-productionize-shopping-cart/grafana-ingress.yaml
-```
-
-Now, you can open your browser to `http://grafana.localtest.me`.
-
-The default login credentials are:
-- **Username:** `admin`
-- **Password:** `prom-operator`
-
-Inside Grafana, you can now explore:
-- **Metrics** from your services in the pre-built dashboards.
-- **Logs** by navigating to the "Explore" view and selecting the "Loki" data source.
-- **Traces** by navigating to the "Explore" view and selecting the "Tempo" data source.
 
 ## Concepts Covered
 
@@ -186,8 +135,8 @@ Inside Grafana, you can now explore:
 15. **RBAC, Service Accounts & Quotas**: Security and Governance
 16. **Ingress**: HTTP(S) Routing
 17. **Custom Resources & Operators**: Extending Kubernetes
-18. **Shopping Cart App**: A complete application example.
-19. **Productionizing with Observability**: Setting up metrics, logs, and traces.
+18. **Resource Requests & Limits**: Managing pod resources.
+19. **Shopping Cart App**: A complete microservices demo application example.
 
 📝 Recap
 We've now covered:

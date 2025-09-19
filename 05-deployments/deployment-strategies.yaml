@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment-strategies
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  # strategy:
+  #   type: Recreate # This strategy terminates old pods before creating new ones.
+  strategy:
+    type: RollingUpdate # This is the default strategy.
+    rollingUpdate:
+      maxSurge: 1 # How many pods can be created above the desired count.
+      maxUnavailable: 1 # How many pods can be unavailable during the update.
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: nginx:1.21.0 # To see the update, change this to 1.21.1 and re-apply
+          ports:
+            - containerPort: 80

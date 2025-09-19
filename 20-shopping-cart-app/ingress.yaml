@@ -3,6 +3,7 @@ kind: Ingress
 metadata:
   name: shopping-cart-ingress
 spec:
+  ingressClassName: nginx
   rules:
     - host: shop.localtest.me
       http:

@@ -34,9 +34,8 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           startupProbe:
-            exec:
-              command:
-                - cat
-                - /tmp/healthy
+            httpGet:
+              path: /
+              port: 80
             failureThreshold: 30
             periodSeconds: 10
