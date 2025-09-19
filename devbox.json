@@ -1,0 +1,16 @@
+{
+  "packages": [
+    "kind@0.20.0",
+    "kubectl@1.28",
+    "k9s@0.27.4",
+    "kubernetes-helm@latest",
+    "kustomize@latest"
+  ],
+  "shell": {
+    "init_hook": [
+      "alias cat='bat --paging never --theme DarkNeon --style plain'",
+      "alias k='kubectl'",
+      "PS1=\"➜ \""
+    ]
+  }
+}
