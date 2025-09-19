@@ -4,5 +4,5 @@
 set -e
 
 echo "🔥 Deleting Kind cluster..."
-kind delete cluster --name kubernetes-playground
+kind delete cluster --name kube-playground
 echo "✅ Cleanup complete!"
