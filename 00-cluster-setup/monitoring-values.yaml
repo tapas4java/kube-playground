@@ -1,0 +1,24 @@
+grafana:
+  additionalDataSources:
+    - name: Loki
+      uid: loki
+      type: loki
+      access: proxy
+      url: http://loki-stack.monitoring.svc.cluster.local:3100
+      jsonData:
+        derivedFields:
+          - datasourceUid: tempo
+            matcherRegex: "traceID=(\\w+)"
+            name: TraceID
+            url: "$${__value.raw}"
+    - name: Tempo
+      uid: tempo
+      type: tempo
+      access: proxy
+      url: http://tempo.monitoring.svc.cluster.local:3200
+      jsonData:
+        tracesToLogs:
+          datasourceUid: "loki"
+          tags: ["job", "instance", "pod", "namespace"]
+          mappedTags: [{ key: "service.name", value: "app" }]
+          filterByTraceID: true

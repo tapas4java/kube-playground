@@ -35,15 +35,19 @@ helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 # Install Prometheus & Grafana
 helm install prometheus prometheus-community/kube-prometheus-stack --version 77.9.1 --namespace monitoring --create-namespace \
+  -f 00-cluster-setup/monitoring-values.yaml \
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 # Install Loki
-helm install loki grafana/loki-stack --version 2.10.2 --namespace monitoring
+helm install loki grafana/loki-stack --version 2.10.2 --namespace monitoring --set grafana.enabled=false
 # Install Tempo
 helm install tempo grafana/tempo --version 1.8.0 --namespace monitoring
 # Apply ServiceMonitors for the shopping cart app
-kubectl apply -f 20-shopping-cart-app/servicemonitors.yaml
 # Apply Grafana Ingress
 kubectl apply -f 00-cluster-setup/grafana-ingress.yaml
+# Apply Grafana Datasources
+kubectl apply -f 00-cluster-setup/grafana-datasources.yaml
+# Apply Grafana Dashboards
+kubectl apply -f 00-cluster-setup/grafana-dashboard.yaml
 
 echo "✅ Setup complete!"
 echo "🎉 Your Kubernetes learning environment is ready."
