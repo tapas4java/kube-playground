@@ -28,71 +28,21 @@ With Devbox installed, you can get the entire learning environment up and runnin
     ```bash
     devbox shell
     ```
+3. Run the `exit` when you are done:
+    ```bash
+    exit
+    ```
 
-This will drop you into a shell with `kind`, `kubectl`, `helm`, `k9s`, and `kustomize` installed and ready to go. You can now proceed to the cluster setup.
+This will drop you into a shell and automatically trigger the `start.sh` script. This script will:
+1.  Create a multi-node Kind cluster running Kubernetes v1.34.0
+2.  Install the NGINX Ingress controller.
+3.  Install the Headlamp dashboard.
 
-## 🚀 Cluster Setup
+Once the script is finished, your environment is ready! It will print the login token for the Headlamp dashboard.
 
-Now that you are inside the Devbox shell, you can create your local Kubernetes cluster and install the dashboard.
+You can access the Headlamp dashboard at `http://headlamp.localtest.me`. Copy the token from your terminal and paste it into the login screen.
 
-**1. Create the Kind Cluster**
-
-A Kind configuration file is provided in `01-cluster-setup/kind-config.yaml`. This configuration sets up a multi-node cluster running Kubernetes v1.29.2 and maps the necessary ports (80 for HTTP and 443 for HTTPS) from your local machine to the cluster's Ingress controller.
-
-To create the cluster, run the following command:
-```bash
-kind create cluster --config 01-cluster-setup/kind-config.yaml
-```
-
-**2. Install Kubernetes Dashboard (Headlamp)**
-
-For a visual way to explore your cluster, we'll install Headlamp. For this, and for our monitoring setup later, we will use **Helm**.
-
-**What is Helm?**
-[Helm](https://helm.sh/) is the package manager for Kubernetes. It helps you define, install, and upgrade even the most complex Kubernetes applications using "Charts". Think of it like `apt` or `brew` for Kubernetes. It simplifies the process of deploying and managing applications.
-
-Now, let's use Helm to install Headlamp.
-
-First, create a service account with cluster-admin privileges for Headlamp to use. This is suitable for a local learning environment.
-```bash
-kubectl apply -f 01-cluster-setup/headlamp-rbac.yaml
-```
-
-Next, add the Headlamp Helm repository and install it:
-```bash
-helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
-helm install headlamp headlamp/headlamp --namespace kube-system
-```
-
-**3. Install an Ingress Controller**
-
-To use `Ingress` resources, you need an Ingress controller. We'll install `ingress-nginx`, which is designed to work with Kind.
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
-```
-You can wait for the controller to be ready by running:
-```bash
-kubectl wait --namespace ingress-nginx --for=condition=ready pod --selector=app.kubernetes.io/component=controller --timeout=90s
-```
-
-**4. Access Headlamp via Ingress**
-
-To access the dashboard, we will use an `Ingress` resource, which exposes services to the outside world.
-
-> **Note:** Don't worry too much about the details of Ingress for now. We will cover it in depth in a later section. This is just to get the dashboard running.
-
-First, apply the Ingress manifest:
-```bash
-kubectl apply -f 01-cluster-setup/headlamp-ingress.yaml
-```
-
-Now, you can open your browser and navigate to `http://headlamp.localtest.me`. This special domain automatically resolves to your local machine, so you don't need to edit your `/etc/hosts` file.
-
-To log in, you will need a token from the `headlamp-admin` service account. Generate one with this command:
-```bash
-kubectl create token headlamp-admin -n kube-system
-```
-Copy the token and paste it into the Headlamp login screen. You now have full access to your cluster through a web UI.
+When you are ready to stop, you can type `exit` in your terminal to leave the Devbox shell. This will automatically trigger the cleanup process.
 
 ## Repository Structure
 
@@ -244,8 +194,6 @@ After reading this two-part series, you should feel comfortable with all the cor
 
 ## 🧹 Cluster Cleanup
 
-When you are finished with the tutorials, you can delete the entire Kind cluster with the following command. This will remove the cluster and all the resources you created.
+When you are finished with the tutorials, you can simply exit the Devbox shell by typing `exit`.
 
-```bash
-kind delete cluster --name kubernetes-playground
-```
+This will automatically trigger the `stop.sh` script, which deletes the Kind cluster and all its resources, leaving your system clean.

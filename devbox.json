@@ -8,9 +8,11 @@
   ],
   "shell": {
     "init_hook": [
-      "alias cat='bat --paging never --theme DarkNeon --style plain'",
+      "echo 'Welcome to the Kubernetes learning environment!'",
       "alias k='kubectl'",
-      "PS1=\"➜ \""
+      "PS1=\"➜ \"",
+      "./start.sh",
+      "trap './stop.sh' EXIT"
     ]
   }
 }
