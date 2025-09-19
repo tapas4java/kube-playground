@@ -38,25 +38,14 @@ With Devbox installed, you can get the entire learning environment up and runnin
 
 This will drop you into a shell and automatically trigger the `start.sh` script. This script will:
 1.  Create a multi-node Kind cluster running Kubernetes v1.34.0.
-2.  Install the Kubernetes Metrics Server (for resource metrics in Headlamp).
-3.  Install the NGINX Ingress controller.
-4.  Install the Headlamp dashboard.
+2.  Install the NGINX Ingress controller.
+3.  Install the Headlamp dashboard.
 
 Once the script is finished, your environment is ready! It will print the login token for the Headlamp dashboard.
 
 You can access the Headlamp dashboard at `http://headlamp.localtest.me`. Copy the token from your terminal and paste it into the login screen.
 
 When you are ready to stop, you can type `exit` in your terminal to leave the Devbox shell. This will automatically trigger the cleanup process.
-
-**1. Create the Kind Cluster**
-
-A Kind configuration file is provided in `01-cluster-setup/kind-config.yaml`. This configuration sets up a multi-node cluster running Kubernetes v1.34.0 and maps the necessary ports (80 for HTTP and 443 for HTTPS) from your local machine to the cluster's Ingress controller.
-
-To create the cluster, run the following command:
-
-```bash
-kind create cluster --config 01-cluster-setup/kind-config.yaml
-```
 
 ## Repository Structure
 
@@ -99,10 +88,6 @@ This application is composed of many microservices written in different language
 2.  Apply all the manifests in the `19-shopping-cart-app` directory. This will deploy all the microservices and the Ingress to expose the application.
     ```bash
     kubectl apply -f 19-shopping-cart-app/
-    ```
-    If you have any issues with the pods not becoming ready, you can redeploy the application by deleting and reapplying the manifests:
-    ```bash
-    kubectl delete -f 19-shopping-cart-app/ && kubectl apply -f 19-shopping-cart-app/
     ```
 3.  Verify that all the pods are running:
     ```bash
