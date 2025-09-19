@@ -2,6 +2,8 @@
 
 > 💡 **Easiest Way to Start:** This repository is configured with [Devbox](#-quick-start-with-devbox) to instantly create a complete Kubernetes learning environment with `kind`, `kubectl`, `helm`, and all other tools pre-installed. Just run `devbox shell` to begin!
 
+![Kube Playground](./kube-playground.png)
+
 This repository contains all the manifests, scripts, and examples from the blog post series "Mastering Kubernetes with Hands-On Examples".
 
 This post aims to demystify key Kubernetes concepts through practical examples. We'll use kubectl commands to interact with our local Kind Kubernetes cluster. Kubernetes, a powerful platform for orchestrating containerized applications, can be overwhelming for newcomers. In Part 1, we learned what Kubernetes is, why it matters, and explored basic concepts.
