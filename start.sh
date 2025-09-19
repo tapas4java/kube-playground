@@ -38,16 +38,11 @@ helm install prometheus prometheus-community/kube-prometheus-stack --version 77.
   -f 00-cluster-setup/monitoring-values.yaml \
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 # Install Loki
-helm install loki grafana/loki-stack --version 2.10.2 --namespace monitoring --set grafana.enabled=false
+helm install loki grafana/loki-stack --version 2.10.2 --namespace monitoring --set grafana.enabled=false -f 00-cluster-setup/loki-values.yaml
 # Install Tempo
 helm install tempo grafana/tempo --version 1.8.0 --namespace monitoring
-# Apply ServiceMonitors for the shopping cart app
 # Apply Grafana Ingress
 kubectl apply -f 00-cluster-setup/grafana-ingress.yaml
-# Apply Grafana Datasources
-kubectl apply -f 00-cluster-setup/grafana-datasources.yaml
-# Apply Grafana Dashboards
-kubectl apply -f 00-cluster-setup/grafana-dashboard.yaml
 
 echo "✅ Setup complete!"
 echo "🎉 Your Kubernetes learning environment is ready."

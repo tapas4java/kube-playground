@@ -103,7 +103,7 @@ The `/20-shopping-cart-app` directory contains the Google microservices demo, a 
 **How to Deploy:**
 
 1.  Make sure you are in the root of the repository.
-2.  Apply all the manifests in the `20-shopping-cart-app` directory. This will deploy all the microservices and the Ingress to expose the application.
+2.  Apply all the manifests in the `20-shopping-cart-app` directory. This will deploy all the microservices, the Ingress to expose the application, and the `ServiceMonitors` to connect it to our observability stack.
     ```bash
     kubectl apply -f 20-shopping-cart-app/
     ```
