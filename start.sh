@@ -32,7 +32,7 @@ kubectl apply -f 01-cluster-setup/headlamp-rbac.yaml
 # Add Helm repo and install Headlamp
 helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
 helm repo update
-helm install headlamp headlamp/headlamp --namespace kube-system
+helm install headlamp headlamp/headlamp --version 0.35.0 --namespace kube-system
 # Apply Headlamp Ingress
 kubectl apply -f 01-cluster-setup/headlamp-ingress.yaml
 

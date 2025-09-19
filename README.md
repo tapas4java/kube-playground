@@ -1,8 +1,8 @@
-# Mastering Kubernetes Concepts with Hands-On Examples
+# Mastering Kubernetes with Hands-On Playground
 
 > 💡 **Easiest Way to Start:** This repository is configured with [Devbox](#-quick-start-with-devbox) to instantly create a complete Kubernetes learning environment with `kind`, `kubectl`, `helm`, and all other tools pre-installed. Just run `devbox shell` to begin!
 
-This repository contains all the manifests, scripts, and examples from the blog post series "Mastering Kubernetes Concepts with Hands-On Examples".
+This repository contains all the manifests, scripts, and examples from the blog post series "Mastering Kubernetes with Hands-On Examples".
 
 This post aims to demystify key Kubernetes concepts through practical examples. We'll use kubectl commands to interact with our local Kind Kubernetes cluster. Kubernetes, a powerful platform for orchestrating containerized applications, can be overwhelming for newcomers. In Part 1, we learned what Kubernetes is, why it matters, and explored basic concepts.
 
@@ -29,12 +29,13 @@ With Devbox installed, you can get the entire learning environment up and runnin
     devbox shell
     ```
 3. Run the `exit` when you are done:
+
     ```bash
     exit
     ```
 
 This will drop you into a shell and automatically trigger the `start.sh` script. This script will:
-1.  Create a multi-node Kind cluster running Kubernetes v1.29.2.
+1.  Create a multi-node Kind cluster running Kubernetes v1.34.0.
 2.  Install the Kubernetes Metrics Server (for resource metrics in Headlamp).
 3.  Install the NGINX Ingress controller.
 4.  Install the Headlamp dashboard.
@@ -44,6 +45,16 @@ Once the script is finished, your environment is ready! It will print the login 
 You can access the Headlamp dashboard at `http://headlamp.localtest.me`. Copy the token from your terminal and paste it into the login screen.
 
 When you are ready to stop, you can type `exit` in your terminal to leave the Devbox shell. This will automatically trigger the cleanup process.
+
+**1. Create the Kind Cluster**
+
+A Kind configuration file is provided in `01-cluster-setup/kind-config.yaml`. This configuration sets up a multi-node cluster running Kubernetes v1.34.0 and maps the necessary ports (80 for HTTP and 443 for HTTPS) from your local machine to the cluster's Ingress controller.
+
+To create the cluster, run the following command:
+
+```bash
+kind create cluster --config 01-cluster-setup/kind-config.yaml
+```
 
 ## Repository Structure
 
@@ -87,6 +98,10 @@ This application is composed of many microservices written in different language
     ```bash
     kubectl apply -f 19-shopping-cart-app/
     ```
+    If you have any issues with the pods not becoming ready, you can redeploy the application by deleting and reapplying the manifests:
+    ```bash
+    kubectl delete -f 19-shopping-cart-app/ && kubectl apply -f 19-shopping-cart-app/
+    ```
 3.  Verify that all the pods are running:
     ```bash
     kubectl get pods
@@ -115,7 +130,7 @@ helm repo update
 
 Now, install the stack into a new `monitoring` namespace:
 ```bash
-helm install prometheus prometheus-community/kube-prometheus-stack --namespace monitoring --create-namespace \
+helm install prometheus prometheus-community/kube-prometheus-stack --version 77.9.1 --namespace monitoring --create-namespace \
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 ```
 
@@ -133,7 +148,7 @@ Next, we'll install Grafana Loki, a powerful log aggregation system. We will use
 ```bash
 helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
-helm install loki grafana/loki-stack --namespace monitoring
+helm install loki grafana/loki-stack --version 2.10.2 --namespace monitoring
 ```
 
 **4. Install Tempo for Tracing**
@@ -144,7 +159,7 @@ The application's deployments have tracing disabled by default. Open the `19-sho
 
 Now, install Tempo:
 ```bash
-helm install tempo grafana/tempo --namespace monitoring
+helm install tempo grafana/tempo --version 1.8.0 --namespace monitoring
 ```
 
 **5. Access Grafana for All Observability Data**
