@@ -34,9 +34,10 @@ With Devbox installed, you can get the entire learning environment up and runnin
     ```
 
 This will drop you into a shell and automatically trigger the `start.sh` script. This script will:
-1.  Create a multi-node Kind cluster running Kubernetes v1.34.0
-2.  Install the NGINX Ingress controller.
-3.  Install the Headlamp dashboard.
+1.  Create a multi-node Kind cluster running Kubernetes v1.29.2.
+2.  Install the Kubernetes Metrics Server (for resource metrics in Headlamp).
+3.  Install the NGINX Ingress controller.
+4.  Install the Headlamp dashboard.
 
 Once the script is finished, your environment is ready! It will print the login token for the Headlamp dashboard.
 
@@ -71,18 +72,18 @@ The repository is organized by Kubernetes concepts, with each directory containi
 
 ### 🛍️ Example Application: Shopping Cart
 
-The `/19-shopping-cart-app` directory contains a fully functional, multi-tier application to demonstrate how various Kubernetes resources work together.
+The `/19-shopping-cart-app` directory contains the Google microservices demo, a fully functional, multi-tier application that demonstrates how various Kubernetes resources work together in a realistic scenario.
+
+> **Note:** This application is sourced from the official [GoogleCloudPlatform/microservices-demo](https://github.com/GoogleCloudPlatform/microservices-demo) repository.
 
 **Application Architecture:**
 
-*   **Frontend:** A React application that provides the user interface. It communicates with the backend API. It is exposed via a `NodePort` service.
-*   **Backend:** A Node.js application that provides the API for the frontend. It connects to the PostgreSQL database to store and retrieve data.
-*   **Database:** A PostgreSQL database for persistent storage. It uses a `PersistentVolumeClaim` to ensure data is not lost when the pod is restarted. It also uses a `Secret` to manage database credentials securely.
+This application is composed of many microservices written in different languages that talk to each other over gRPC. It includes services for a frontend, product catalog, cart, checkout, and more.
 
 **How to Deploy:**
 
 1.  Make sure you are in the root of the repository.
-2.  Apply all the manifests in the `19-shopping-cart-app` directory. This will deploy the frontend, backend, database, and the Ingress to expose the application.
+2.  Apply all the manifests in the `19-shopping-cart-app` directory. This will deploy all the microservices and the Ingress to expose the application.
     ```bash
     kubectl apply -f 19-shopping-cart-app/
     ```
@@ -90,17 +91,21 @@ The `/19-shopping-cart-app` directory contains a fully functional, multi-tier ap
     ```bash
     kubectl get pods
     ```
-    You should see pods for the frontend, backend, and database.
+    You should see pods for all the different microservices. This may take a few minutes to start up.
 
 **How to Access:**
 
-You can now access the shopping cart application at `http://cart.localtest.me`.
+You can now access the shopping cart application at `http://shop.localtest.me`.
 
-### 🏭 Productionizing the App with Monitoring
+### 🏭 Productionizing the App with Full Observability
 
-The final step is to install a complete monitoring stack using the `kube-prometheus-stack` Helm chart. This stack includes Prometheus for collecting metrics and Grafana for visualizing them. The manifests for this section are in the `/20-productionize-shopping-cart` directory.
+The final step is to install a complete observability stack. This will give you visibility into the three pillars of observability: **metrics**, **logs**, and **traces**. We will use a combination of popular open-source tools from the Grafana ecosystem.
 
-**1. Install the Kube Prometheus Stack**
+The manifests for this section are in the `/20-productionize-shopping-cart` directory.
+
+**1. Install Prometheus for Metrics**
+
+We'll use the `kube-prometheus-stack` Helm chart, which includes Prometheus for collecting metrics and Grafana for dashboards.
 
 First, add the `prometheus-community` Helm repository:
 ```bash
@@ -114,27 +119,37 @@ helm install prometheus prometheus-community/kube-prometheus-stack --namespace m
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 ```
 
-**2. Update the Backend Service for Monitoring**
+**2. Configure ServiceMonitors for Key Services**
 
-The backend application already exposes a `/metrics` endpoint. We just need to update the `Service` to expose this port and add a label for Prometheus to find it.
-
-Apply the updated backend service manifest from the shopping cart application directory:
+`ServiceMonitor`s tell Prometheus which services to monitor. Apply the manifest from the `/20-productionize-shopping-cart` directory to monitor the `frontend`, `checkout`, and `recommendation` services.
 ```bash
-# This manifest contains the updated service definition
-kubectl apply -f 19-shopping-cart-app/backend.yaml
+kubectl apply -f 20-productionize-shopping-cart/servicemonitors.yaml
 ```
 
-**3. Create a ServiceMonitor**
+**3. Install Loki for Logging**
 
-A `ServiceMonitor` tells Prometheus which services to monitor. Apply the `ServiceMonitor` manifest from the `/20-productionize-shopping-cart` directory:
+Next, we'll install Grafana Loki, a powerful log aggregation system. We will use the `loki-stack` chart, which includes Loki for the backend and Promtail as the agent to collect logs from all pods.
+
 ```bash
-kubectl apply -f 20-productionize-shopping-cart/servicemonitor.yaml
+helm repo add grafana https://grafana.github.io/helm-charts
+helm repo update
+helm install loki grafana/loki-stack --namespace monitoring
 ```
-This monitor will now start scraping metrics from our backend service.
 
-**4. Access Grafana via Ingress**
+**4. Install Tempo for Tracing**
 
-To access the Grafana dashboard, apply the Ingress manifest from the `/20-productionize-shopping-cart` directory:
+Finally, we'll install Grafana Tempo for distributed tracing. But first, we need to enable tracing in the demo application.
+
+The application's deployments have tracing disabled by default. Open the `19-shopping-cart-app/google-microservices-demo.yaml` file and change all instances of `DISABLE_TRACING` from `"1"` to `"0"`.
+
+Now, install Tempo:
+```bash
+helm install tempo grafana/tempo --namespace monitoring
+```
+
+**5. Access Grafana for All Observability Data**
+
+To access the Grafana dashboard, apply the Ingress manifest:
 ```bash
 kubectl apply -f 20-productionize-shopping-cart/grafana-ingress.yaml
 ```
@@ -145,7 +160,10 @@ The default login credentials are:
 - **Username:** `admin`
 - **Password:** `prom-operator`
 
-You can now explore the pre-built dashboards and see metrics from the shopping cart application.
+Inside Grafana, you can now explore:
+- **Metrics** from your services in the pre-built dashboards.
+- **Logs** by navigating to the "Explore" view and selecting the "Loki" data source.
+- **Traces** by navigating to the "Explore" view and selecting the "Tempo" data source.
 
 ## Concepts Covered
 
@@ -167,7 +185,7 @@ You can now explore the pre-built dashboards and see metrics from the shopping c
 16. **Ingress**: HTTP(S) Routing
 17. **Custom Resources & Operators**: Extending Kubernetes
 18. **Shopping Cart App**: A complete application example.
-19. **Productionizing with Monitoring**: Setting up Prometheus and Grafana.
+19. **Productionizing with Observability**: Setting up metrics, logs, and traces.
 
 📝 Recap
 We've now covered:
