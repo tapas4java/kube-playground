@@ -55,10 +55,8 @@ spec:
           env:
             - name: PORT
               value: "8080"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
           readinessProbe:
@@ -151,10 +149,8 @@ spec:
               value: "currencyservice:7000"
             - name: CART_SERVICE_ADDR
               value: "cartservice:7070"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
           resources:
@@ -232,10 +228,8 @@ spec:
               value: "8080"
             - name: PRODUCT_CATALOG_SERVICE_ADDR
               value: "productcatalogservice:3550"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
             - name: DISABLE_DEBUGGER
@@ -338,12 +332,10 @@ spec:
               value: "adservice:9555"
             - name: SHOPPING_ASSISTANT_SERVICE_ADDR
               value: "shoppingassistantservice:80"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
-              value: "0"
+              value: "1"
           resources:
             requests:
               cpu: 100m
@@ -424,10 +416,8 @@ spec:
           env:
             - name: PORT
               value: "50051"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
             - name: DISABLE_DEBUGGER
@@ -502,10 +492,8 @@ spec:
           env:
             - name: PORT
               value: "3550"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
             - name: DISABLE_DEBUGGER
@@ -584,10 +572,8 @@ spec:
               value: "7070"
             - name: LISTEN_ADDR
               value: "0.0.0.0"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
           resources:
@@ -821,10 +807,8 @@ spec:
           env:
             - name: PORT
               value: "7000"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
             - name: DISABLE_DEBUGGER
@@ -898,10 +882,8 @@ spec:
           env:
             - name: PORT
               value: "50051"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
             - name: DISABLE_DEBUGGER
@@ -977,10 +959,8 @@ spec:
           env:
             - name: PORT
               value: "9555"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
             - name: DISABLE_DEBUGGER
@@ -1065,10 +1045,8 @@ spec:
           env:
             - name: PORT
               value: "80"
-            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
-              value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
-              value: "0"
+              value: "1"
             - name: DISABLE_PROFILER
               value: "1"
             - name: DISABLE_DEBUGGER

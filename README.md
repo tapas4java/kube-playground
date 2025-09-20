@@ -40,13 +40,10 @@ This will drop you into a shell and automatically trigger the `start.sh` script.
 1.  Create a multi-node Kind cluster running Kubernetes v1.34.0.
 2.  Install the NGINX Ingress controller.
 3.  Install the Headlamp dashboard.
-4.  Install a full observability stack (Prometheus, Grafana, Loki, Tempo).
 
 Once the script is finished, your environment is ready! It will print the login token for the Headlamp dashboard.
 
 You can access the Headlamp dashboard at `http://headlamp.localtest.me`. Copy the token from your terminal and paste it into the login screen.
-
-You can access the Grafana dashboard at `http://grafana.localtest.me` (login with `admin` / `prom-operator`).
 
 When you are ready to stop, you can type `exit` in your terminal to leave the Devbox shell. This will automatically trigger the cleanup process.
 
@@ -103,7 +100,7 @@ The `/20-shopping-cart-app` directory contains the Google microservices demo, a 
 **How to Deploy:**
 
 1.  Make sure you are in the root of the repository.
-2.  Apply all the manifests in the `20-shopping-cart-app` directory. This will deploy all the microservices, the Ingress to expose the application, and the `ServiceMonitors` to connect it to our observability stack.
+2.  Apply all the manifests in the `20-shopping-cart-app` directory. This will deploy all the microservices and the Ingress to expose the application.
     ```bash
     kubectl apply -f 20-shopping-cart-app/
     ```
