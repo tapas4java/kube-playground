@@ -146,7 +146,7 @@ spec:
             - name: PAYMENT_SERVICE_ADDR
               value: "paymentservice:50051"
             - name: EMAIL_SERVICE_ADDR
-              value: "emailservice:5000"
+              value: "emailservice:8080"
             - name: CURRENCY_SERVICE_ADDR
               value: "currencyservice:7000"
             - name: CART_SERVICE_ADDR
@@ -237,6 +237,8 @@ spec:
             - name: DISABLE_TRACING
               value: "0"
             - name: DISABLE_PROFILER
+              value: "1"
+            - name: DISABLE_DEBUGGER
               value: "1"
           resources:
             requests:
@@ -334,27 +336,14 @@ spec:
               value: "checkoutservice:5050"
             - name: AD_SERVICE_ADDR
               value: "adservice:9555"
+            - name: SHOPPING_ASSISTANT_SERVICE_ADDR
+              value: "shoppingassistantservice:80"
             - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
               value: "tempo.monitoring.svc.cluster.local:4317"
             - name: DISABLE_TRACING
               value: "0"
             - name: DISABLE_PROFILER
               value: "0"
-          # # ENV_PLATFORM: One of: local, gcp, aws, azure, onprem, alibaba
-          # # When not set, defaults to "local" unless running in GKE, otherwies auto-sets to gcp
-          # - name: ENV_PLATFORM
-          #   value: "aws"
-          # - name: ENABLE_PROFILER
-          #   value: "0"
-          # - name: CYMBAL_BRANDING
-          #   value: "true"
-          # - name: ENABLE_ASSISTANT
-          #   value: "true"
-          # - name: FRONTEND_MESSAGE
-          #   value: "Replace this with a message you want to display on all pages."
-          # As part of an optional Google Cloud demo, you can run an optional microservice called the "packaging service".
-          # - name: PACKAGING_SERVICE_URL
-          #   value: "" # This value would look like "http://123.123.123"
           resources:
             requests:
               cpu: 100m
@@ -441,6 +430,7 @@ spec:
               value: "0"
             - name: DISABLE_PROFILER
               value: "1"
+            - name: DISABLE_DEBUGGER
           readinessProbe:
             grpc:
               port: 50051
@@ -518,6 +508,7 @@ spec:
               value: "0"
             - name: DISABLE_PROFILER
               value: "1"
+            - name: DISABLE_DEBUGGER
           readinessProbe:
             grpc:
               port: 3550
@@ -589,6 +580,8 @@ spec:
           env:
             - name: REDIS_ADDR
               value: "redis-cart:6379"
+            - name: PORT
+              value: "7070"
             - name: LISTEN_ADDR
               value: "0.0.0.0"
             - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
@@ -599,10 +592,10 @@ spec:
               value: "1"
           resources:
             requests:
-              cpu: 200m
+              cpu: 100m
               memory: 64Mi
             limits:
-              cpu: 300m
+              cpu: 200m
               memory: 128Mi
           readinessProbe:
             initialDelaySeconds: 15
@@ -834,6 +827,7 @@ spec:
               value: "0"
             - name: DISABLE_PROFILER
               value: "1"
+            - name: DISABLE_DEBUGGER
           readinessProbe:
             grpc:
               port: 7000
@@ -910,6 +904,7 @@ spec:
               value: "0"
             - name: DISABLE_PROFILER
               value: "1"
+            - name: DISABLE_DEBUGGER
           readinessProbe:
             periodSeconds: 5
             grpc:
@@ -988,13 +983,7 @@ spec:
               value: "0"
             - name: DISABLE_PROFILER
               value: "1"
-          resources:
-            requests:
-              cpu: 200m
-              memory: 180Mi
-            limits:
-              cpu: 300m
-              memory: 300Mi
+            - name: DISABLE_DEBUGGER
           readinessProbe:
             initialDelaySeconds: 20
             periodSeconds: 15
@@ -1025,4 +1014,93 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: adservice
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shoppingassistantservice
+  labels:
+    app: shoppingassistantservice
+spec:
+  selector:
+    matchLabels:
+      app: shoppingassistantservice
+  template:
+    metadata:
+      labels:
+        app: shoppingassistantservice
+    spec:
+      serviceAccountName: shoppingassistantservice
+      terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      volumes:
+        - name: site-packages
+          emptyDir: {}
+      initContainers:
+        - name: installer
+          image: python:3.12-slim
+          command: ["pip", "install", "langgraph"]
+          volumeMounts:
+            - name: site-packages
+              mountPath: /usr/local/lib/python3.12/site-packages/
+      containers:
+        - name: server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          image: us-central1-docker.pkg.dev/google-samples/microservices-demo/shoppingassistantservice:v0.10.3
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: site-packages
+              mountPath: /usr/local/lib/python3.12/site-packages/
+          env:
+            - name: PORT
+              value: "80"
+            - name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+              value: "tempo.monitoring.svc.cluster.local:4317"
+            - name: DISABLE_TRACING
+              value: "0"
+            - name: DISABLE_PROFILER
+              value: "1"
+            - name: DISABLE_DEBUGGER
+          readinessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            grpc:
+              port: 80
+          livenessProbe:
+            initialDelaySeconds: 20
+            periodSeconds: 15
+            grpc:
+              port: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shoppingassistantservice
+  labels:
+    app: shoppingassistantservice
+spec:
+  type: ClusterIP
+  selector:
+    app: shoppingassistantservice
+  ports:
+    - name: grpc
+      port: 80
+      targetPort: 80
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: shoppingassistantservice
+---
 # [END gke_release_kubernetes_manifests_microservices_demo]
