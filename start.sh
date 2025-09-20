@@ -5,7 +5,7 @@ set -e
 
 # --- Create Kind Cluster ---
 echo "🚀 Creating Kind cluster..."
-kind create cluster --config 00-cluster-setup/kind-config.yaml
+kind create cluster --config 01-cluster-setup/kind-config.yaml
 
 # --- Install Ingress Controller ---
 echo "🔌 Installing Ingress NGINX controller..."
@@ -19,13 +19,13 @@ kubectl wait --namespace ingress-nginx \
 # --- Install Headlamp (Kubernetes Dashboard) ---
 echo "💡 Installing Headlamp dashboard..."
 # Apply RBAC first
-kubectl apply -f 00-cluster-setup/headlamp-rbac.yaml
+kubectl apply -f 01-cluster-setup/headlamp-rbac.yaml
 # Add Helm repo and install Headlamp
 helm repo add headlamp https://kubernetes-sigs.github.io/headlamp/
 helm repo update
 helm install headlamp headlamp/headlamp --version 0.35.0 --namespace kube-system
 # Apply Headlamp Ingress
-kubectl apply -f 00-cluster-setup/headlamp-ingress.yaml
+kubectl apply -f 01-cluster-setup/headlamp-ingress.yaml
 
 echo "✅ Setup complete!"
 echo "🎉 Your Kubernetes learning environment is ready."

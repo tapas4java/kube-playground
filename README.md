@@ -51,7 +51,7 @@ When you are ready to stop, you can type `exit` in your terminal to leave the De
 
 The repository is organized by Kubernetes concepts, with each directory containing the relevant manifests and instructions.
 
--   `/00-cluster-setup`: Contains all the configuration for the automated environment setup. To see how the environment is created, you can inspect the `start.sh` script and the manifests in this directory.
+-   `/01-cluster-setup`: Contains all the configuration for the automated environment setup. To see how the environment is created, you can inspect the `start.sh` script and the manifests in this directory.
 
 -   `/02-namespaces`: Namespaces are used to create logical partitions of the cluster. The `namespaces.yaml` file shows how to create `dev` and `prod` namespaces.
 
